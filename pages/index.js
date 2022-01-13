@@ -1,5 +1,6 @@
 import MeetupList from "../components/meetups/MeetupList";
-import Layout from "../components/layout/Layout";
+
+import { useEffect, useState } from "react";
 const DUMMY_MEETUP = [
   {
     id: "m1",
@@ -9,7 +10,16 @@ const DUMMY_MEETUP = [
     description: "This is a second meetup",
   },
 ];
-function HomePage() {
-  return <MeetupList meetups={DUMMY_MEETUP} />;
+function HomePage(props) {
+  return <MeetupList meetups={props.DUMMY_MEETUP} />;
 }
+
+export async function getStaticProps() {
+  return {
+    props: {
+      meetups: DUMMY_MEETUP,
+    },
+  };
+}
+
 export default HomePage;
