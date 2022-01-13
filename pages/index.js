@@ -1,42 +1,39 @@
+import { MongoClient } from "mongodb";
 import MeetupList from "../components/meetups/MeetupList";
 
-const DUMMY_MEETUP = [
-  {
-    id: "m1",
-    title: "A First Meetup",
-    image: "https://www.viajali.com.br/wp-content/uploads/2016/09/brasil-1.jpg",
-    address: "some address ...",
-    description: "This is a second meetup",
-  },
-  {
-    id: "m2",
-    title: "A First Meetup",
-    image: "https://www.viajali.com.br/wp-content/uploads/2016/09/brasil-1.jpg",
-    address: "some address ...",
-    description: "This is a second meetup",
-  },
-];
 function HomePage(props) {
   return <MeetupList meetups={props.meetups} />;
 }
 
-export async function getServerSideProps(context) {
-  const req = context.req;
-  const res = context.res;
-  return {
-    props: {
-      meetups: DUMMY_MEETUP,
-    },
-  };
-}
-
-// export async function getStaticProps() {
+// export async function getServerSideProps(context) {
+//   const req = context.req;
+//   const res = context.res;
 //   return {
 //     props: {
 //       meetups: DUMMY_MEETUP,
 //     },
-//     revalidate: 10,
 //   };
 // }
+
+export async function getStaticProps() {
+  const client = await MongoClient.connect(
+    "mongodb+srv://hagleyson:963741@cluster0.fyrgo.mongodb.net/meetups?retryWrites=true&w=majority"
+  );
+  const db = client.db();
+  const meetupsCollection = db.collection("meetups");
+  const meetups = await meetupsCollection.find().toArray();
+  client.close();
+  return {
+    props: {
+      meetups: meetups.map((meetup) => ({
+        title: meetup.title,
+        address: meetup.address,
+        image: meetup.image,
+        id: meetup._id.toString(),
+      })),
+    },
+    revalidate: 1,
+  };
+}
 
 export default HomePage;
